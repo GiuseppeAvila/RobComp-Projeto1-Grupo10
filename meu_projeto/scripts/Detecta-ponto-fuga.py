@@ -71,9 +71,7 @@ def interseccao(a1, b1, rho1, a2, b2, rho2):
     m_2 = (y2_2 - y1_2) / (x2_2 - x1_2)
     h_2 = y1_2 - (m_2 * x1_2)
 
-    if (m_1 - m_2) != 0:
-        x_ponto = (h_2 - h_1) / (m_1 - m_2)
-
+    x_ponto = (h_2 - h_1) / (m_1 - m_2)
     y_ponto = int((m_1 * x_ponto) + h_1)
     x_ponto = int(x_ponto)
 
@@ -130,7 +128,7 @@ while (cap.isOpened()):
         
         desenhar_reta_media(aMed_esq, bMed_esq, rhoMed_esq)
         desenhar_reta_media(aMed_dir, bMed_dir, rhoMed_dir)
-        #interseccao(aMed_esq, bMed_esq, rhoMed_esq, aMed_dir, bMed_dir, rhoMed_dir)
+        interseccao(aMed_esq, bMed_esq, rhoMed_esq, aMed_dir, bMed_dir, rhoMed_dir)
         
         font = cv2.FONT_HERSHEY_SIMPLEX
         cv2.putText(mask1,'Press q to quit',(0,50), font, 1,(255,255,255),2,cv2.LINE_AA)
