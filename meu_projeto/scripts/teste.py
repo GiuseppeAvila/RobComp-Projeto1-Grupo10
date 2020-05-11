@@ -87,8 +87,7 @@ def identifica_cor(frame):
     hsv1_M = np.array([ 0, 0, 0], dtype=np.uint8)
     hsv2_M= np.array([0, 0, 255], dtype=np.uint8)
 
-    # placeholders
-
+    # placeholdersmaior
     valores_esq = { "a_esq" : [], "b_esq" : [], "rho_esq" : [],"aMed_esq" : 1.0, "bMed_esq" : 1.0, "rhoMed_esq" : 1.0}
     valores_dir = { "a_dir" : [], "b_dir" : [], "rho_dir" : [],"aMed_dir" : 1.0, "bMed_dir" : 1.0, "rhoMed_dir" : 1.0}
 
