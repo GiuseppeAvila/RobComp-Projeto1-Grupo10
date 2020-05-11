@@ -45,23 +45,25 @@ def desenhar_reta_media(frame, a, b, rho):
 
 
 
-def interseccao(frame, a1, b1, rho1, a2, b2, rho2):
-    x0_1 = a1*rho1
-    y0_1 = b1*rho1
-    x1_1 = int(x0_1 + 10000*(-b1))
-    y1_1 = int(y0_1 + 10000*(a1))
-    x2_1 = int(x0_1 - 10000*(-b1))
-    y2_1 = int(y0_1 - 10000*(a1))
+def interseccao(frame, valores_esq, valores_dir):
+    xBase_esq = valores_esq["aMed_esq"] * valores_esq["rhoMed_esq"]
+    yBase_esq = valores_esq["bMed_esq"] * valores_esq["rhoMed_esq"]
 
-    m_1 = int((y2_1 - y1_1) / (x2_1 - x1_1))
-    h_1 = y1_1 - (m_1 * x1_1)
+    x1_esq = int(xBase_esq + 10000*(-valores_esq["bMed_esq"]))
+    y1_esq = int(yBase_esq + 10000*(valores_esq["aMed_esq"]))
+    
+    x2_esq = int(xBase_esq - 10000*(-valores_esq["bMed_esq"]))
+    y2_esq = int(yBase_esq - 10000*(valores_esq["aMed_esq"]))
 
-    x0_2 = a2*rho2
-    y0_2 = b2*rho2
-    x1_2 = int(x0_2 + 10000*(-b2))
-    y1_2 = int(y0_2 + 10000*(a2))
-    x2_2 = int(x0_2 - 10000*(-b2))
-    y2_2 = int(y0_2 - 10000*(a2))
+    m_1 = int((y2_esq - y1_esq) / (x2_esq - x1_esq))
+    h_1 = y1_esq - (m_1 * x1_esq)
+
+    x0_2 = valores_dir["aMed_dir"] * valores_dir["rhoMed_dir"]
+    y0_2 = valores_dir["bMed_dir"] * valores_dir["rhoMed_dir"]
+    x1_2 = int(x0_2 + 10000*(-valores_dir["bMed_dir"]))
+    y1_2 = int(y0_2 + 10000*(valores_dir["aMed_dir"]))
+    x2_2 = int(x0_2 - 10000*(-valores_dir["bMed_dir"]))
+    y2_2 = int(y0_2 - 10000*(valores_dir["aMed_dir"]))
 
     m_2 = int((y2_2 - y1_2) / (x2_2 - x1_2))
     h_2 = y1_2 - (m_2 * x1_2)
@@ -74,10 +76,10 @@ def interseccao(frame, a1, b1, rho1, a2, b2, rho2):
 
     y_ponto = int((m_1 * x_ponto) + h_1)
 
-
+    cv2.circle(frame,(x_ponto,y_ponto),10,(0,255,0),-1)
     return x_ponto , y_ponto
 
-    cv2.circle(frame,(x_ponto,y_ponto),10,(0,255,0),-1)
+    
 
 
 def identifica_cor(frame):
@@ -91,22 +93,8 @@ def identifica_cor(frame):
     valores_esq = { "a_esq" : [], "b_esq" : [], "rho_esq" : [],"aMed_esq" : 1.0, "bMed_esq" : 1.0, "rhoMed_esq" : 1.0}
     valores_dir = { "a_dir" : [], "b_dir" : [], "rho_dir" : [],"aMed_dir" : 1.0, "bMed_dir" : 1.0, "rhoMed_dir" : 1.0}
 
-    #aMed_esq = 1
-    #bMed_esq = 1
-    #rhoMed_esq = 1
-    #aMed_dir = 1
-    #bMed_dir = 1
-    #rhoMed_dir = 1
-
     min_length = 250
     lista_ab = []
-
-    #a_esq = []
-    #b_esq = []
-    #rho_esq = []
-    #a_dir = []
-    #b_dir = []
-    #rho_dir = []
 
     hsv = cv2.cvtColor(frame, cv2.COLOR_BGR2HSV)
 
@@ -147,6 +135,7 @@ def identifica_cor(frame):
         
     else:
         x_ponto = 1
+        y_ponto = 1
 
     x_ponto, y_ponto= interseccao(frame, valores_esq["aMed_esq"], valores_esq["bMed_esq"], valores_esq["rhoMed_esq"], valores_dir["aMed_dir"], valores_dir["bMed_dir"], valores_dir["rhoMed_dir"])
     media = (x_ponto,y_ponto)
