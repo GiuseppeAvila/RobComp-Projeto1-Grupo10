@@ -155,8 +155,7 @@ def identifica_cor(frame):
     font = cv2.FONT_HERSHEY_SIMPLEX
     cv2.putText(mask1,'Press q to quit',(0,50), font, 1,(255,255,255),2,cv2.LINE_AA)
     cv2.imshow ('Frame', frame)
-
-
+    
     centro = (frame.shape[1]//2, frame.shape[0]//2)
 
 

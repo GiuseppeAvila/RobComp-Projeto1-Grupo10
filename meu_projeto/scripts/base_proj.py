@@ -80,7 +80,7 @@ def roda_todo_frame(imagem):
         temp_image = bridge.compressed_imgmsg_to_cv2(imagem, "bgr8")
         # Note que os resultados já são guardados automaticamente na variável
         # chamada resultados
-        centro,result_frame, result_tuples =  mascara.identifica_cor(temp_image)
+        centro,result_frame=  teste.identifica_cor(temp_image)
         #centroo, result_frame, result_tuples =  visao_module.identifica_cor(temp_image)        
         for r in resultados:
             # print(r) - print feito para documentar e entender
@@ -89,8 +89,8 @@ def roda_todo_frame(imagem):
 
         depois = time.clock()
         # Desnecessário - Hough e MobileNet já abrem janelas
-        cv_image = result_frame.copy()
-        cv2.imshow("cv_image no loop principal", cv_image)
+        #cv_image = result_frame.copy()
+        #cv2.imshow("cv_image no loop principal", cv_image)
         cv2.waitKey(1)
     except CvBridgeError as e:
         print('ex', e)
