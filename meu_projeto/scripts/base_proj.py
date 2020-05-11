@@ -22,8 +22,8 @@ from nav_msgs.msg import Odometry
 from std_msgs.msg import Header
 
 
-
-import visao_module
+import cormodule
+import teste
 
 
 bridge = CvBridge()
@@ -33,6 +33,20 @@ media = []
 centro = []
 atraso = 1.5E9 # 1 segundo e meio. Em nanossegundos
 
+
+area = 0.0 # Variavel com a area do maior contorno
+
+# Só usar se os relógios ROS da Raspberry e do Linux desktop estiverem sincronizados. 
+# Descarta imagens que chegam atrasadas demais
+check_delay = False 
+
+resultados = [] # Criacao de uma variavel global para guardar os resultados vistos
+
+x = 0
+y = 0
+z = 0 
+id = 0
+
 frame = "camera_link"
 # frame = "head_camera"  # DESCOMENTE para usar com webcam USB via roslaunch tag_tracking usbcam
 
@@ -41,6 +55,9 @@ tfl = 0
 tf_buffer = tf2_ros.Buffer()
 
 
+
+
+# A função a seguir é chamada sempre que chega um novo frame
 def roda_todo_frame(imagem):
     print("frame")
     global cv_image
@@ -62,7 +79,7 @@ def roda_todo_frame(imagem):
         temp_image = bridge.compressed_imgmsg_to_cv2(imagem, "bgr8")
         # Note que os resultados já são guardados automaticamente na variável
         # chamada resultados
-        centro, resultados =  visao_module.processa(temp_image)
+        centro,resultados =  teste.identifica_cor(temp_image)
         #centroo, result_frame, result_tuples =  visao_module.identifica_cor(temp_image)        
         for r in resultados:
             # print(r) - print feito para documentar e entender
@@ -71,12 +88,11 @@ def roda_todo_frame(imagem):
 
         depois = time.clock()
         # Desnecessário - Hough e MobileNet já abrem janelas
-        cv_image = saida_net.copy()
+        #cv_image = saida_net.copy()
         cv2.imshow("cv_image no loop principal", cv_image)
-        cv2.waitKey(1)
+        cv2.waitKey(0)
     except CvBridgeError as e:
         print('ex', e)
-
     
 if __name__=="__main__":
     rospy.init_node("cor")
