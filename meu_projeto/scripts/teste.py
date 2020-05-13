@@ -77,9 +77,10 @@ def interseccao(frame, valores_esq, valores_dir):
     y_ponto = int((m_1 * x_ponto) + h_1)
 
     cv2.circle(frame,(x_ponto,y_ponto),10,(0,255,0),-1)
+    
     return x_ponto , y_ponto
 
-    
+
 
 
 def identifica_cor(frame):
@@ -93,7 +94,7 @@ def identifica_cor(frame):
     valores_esq = { "a_esq" : [], "b_esq" : [], "rho_esq" : [],"aMed_esq" : 1.0, "bMed_esq" : 1.0, "rhoMed_esq" : 1.0}
     valores_dir = { "a_dir" : [], "b_dir" : [], "rho_dir" : [],"aMed_dir" : 1.0, "bMed_dir" : 1.0, "rhoMed_dir" : 1.0}
 
-    min_length = 250
+    min_length = 50 # Melhorar mascara e aumentar min_len
     lista_ab = []
 
     hsv = cv2.cvtColor(frame, cv2.COLOR_BGR2HSV)
@@ -133,19 +134,16 @@ def identifica_cor(frame):
         valores_dir["bMed_dir"] = sum(valores_dir["b_dir"]) / len(valores_dir["b_dir"])
         valores_dir["rhoMed_dir"] = sum(valores_dir["rho_dir"]) / len(valores_dir["rho_dir"])
         
-    else:
-        x_ponto = 1
-        y_ponto = 1
-
-    x_ponto, y_ponto= interseccao(frame, valores_esq["aMed_esq"], valores_esq["bMed_esq"], valores_esq["rhoMed_esq"], valores_dir["aMed_dir"], valores_dir["bMed_dir"], valores_dir["rhoMed_dir"])
+    desenhar_reta_media(frame, valores_esq["aMed_esq"], valores_esq["bMed_esq"], valores_esq["rhoMed_esq"])
+    desenhar_reta_media(frame, valores_dir["aMed_dir"], valores_dir["bMed_dir"], valores_dir["rhoMed_dir"])
+    x_ponto, y_ponto = interseccao(frame, valores_esq["aMed_esq"], valores_esq["bMed_esq"], valores_esq["rhoMed_esq"], valores_dir["aMed_dir"], valores_dir["bMed_dir"], valores_dir["rhoMed_dir"])
     media = (x_ponto,y_ponto)
 
         
     font = cv2.FONT_HERSHEY_SIMPLEX
     cv2.putText(mask1,'Press q to quit',(0,50), font, 1,(255,255,255),2,cv2.LINE_AA)
-    cv2.imshow ('Frame', selecao)
-
-
+    cv2.imshow ('Frame', frame)
+    
     centro = (frame.shape[1]//2, frame.shape[0]//2)
 
 
