@@ -158,11 +158,12 @@ if __name__=="__main__":
 
     try:
         # Inicializando - por default gira no sentido anti-horário
-        vel = Twist(Vector3(0,0,0), Vector3(0,0,0))
-        twist = math.pi/10.0
+
+        twist = 0.15 
 
         
         while not rospy.is_shutdown():
+            vel = Twist(Vector3(0,0,0), Vector3(0,0,0))
             for r in centro_bola:
                 x_bola,y_bola = centro_bola
 
@@ -170,14 +171,14 @@ if __name__=="__main__":
                 x_frame,y_frame = centro_frame
 
 
-            if x_bola-10 > x_frame:
+            if x_bola -3 > x_frame:
                 vel = Twist(Vector3(0,0,0), Vector3(0,0,-twist))
 
-            elif x_bola+10 < x_frame:
+            if x_bola +3 < x_frame:
                 vel = Twist(Vector3(0,0,0), Vector3(0,0,twist))   
 
-            elif x_bola-10 <x_frame>  x_bola+10:
-                vel = Twist(Vector3(0,0,0), Vector3(2,0,0))
+            if x_bola-20 < x_frame < x_bola+20:
+                vel = Twist(Vector3(0.15,0,0), Vector3(0,0,0))
 
 
             
