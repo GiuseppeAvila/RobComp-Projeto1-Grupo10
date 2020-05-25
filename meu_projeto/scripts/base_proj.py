@@ -25,7 +25,8 @@ from std_msgs.msg import Header
 
 
 import visao_module
-import roda
+import follow
+import creeper
 
 
 # MONTANDO AS VARIÁVES
@@ -35,13 +36,15 @@ bridge = CvBridge()
 cv_image = None
 cv_image_1 = None
 media = []
-centro_bola = []
-centro_frame = []
+centro_bola = None
+centro_frame = None
+centro_creeper = None
 atraso = 1.5E9 
 y_bola = 0
 y_frame = 0
 x_bola = 0
 x_frame = 0
+estado = False
 
 area = 0.0
 check_delay = False 
@@ -111,7 +114,9 @@ def roda_todo_frame(imagem):
     global media
     global centro_frame
     global centro_bola
+    global centro_creeper
     global resultados
+    global estado
 
     now = rospy.get_rostime()
     imgtime = imagem.header.stamp
@@ -125,12 +130,14 @@ def roda_todo_frame(imagem):
         temp_image = bridge.compressed_imgmsg_to_cv2(imagem, "bgr8")
 
         # CHAMADA PARA SEGUIR AS LINHAS AMARELAS 
-        saida_net , centro_frame, centro_bola =  roda.image_callback(temp_image)        
+        saida_follow , centro_frame, centro_bola =  follow.image_callback(temp_image) 
+        # CHAMADA PARA IDENTIFICACAO DOS CREEPERS 
+        saida_creeper, centro_creeper, estado   = creeper.image_callback(temp_image, "pink")    
         for r in resultados:    
             pass
 
         depois = time.clock()
-        cv_image = saida_net.copy()
+        cv_image = saida_creeper.copy()
     except CvBridgeError as e:
         print('ex', e)
 
@@ -164,21 +171,56 @@ if __name__=="__main__":
         
         while not rospy.is_shutdown():
             vel = Twist(Vector3(0,0,0), Vector3(0,0,0))
-            for r in centro_bola:
-                x_bola,y_bola = centro_bola
+            print (estado)
 
-            for r in centro_frame:
-                x_frame,y_frame = centro_frame
+            if estado == False:
+                
+                if centro_bola is not None:
+
+                    for r in centro_bola:
+                        x_bola,y_bola = centro_bola
+
+                    for r in centro_frame:
+                        x_frame,y_frame = centro_frame
 
 
-            if x_bola -3 > x_frame:
-                vel = Twist(Vector3(0,0,0), Vector3(0,0,-twist))
+                    if x_bola -3 > x_frame:
+                        vel = Twist(Vector3(0,0,0), Vector3(0,0,-twist))
 
-            if x_bola +3 < x_frame:
-                vel = Twist(Vector3(0,0,0), Vector3(0,0,twist))   
+                    if x_bola +3 < x_frame:
+                        vel = Twist(Vector3(0,0,0), Vector3(0,0,twist))   
 
-            if x_bola-20 < x_frame < x_bola+20:
-                vel = Twist(Vector3(0.15,0,0), Vector3(0,0,0))
+                    if x_bola-20 < x_frame < x_bola+20:
+                        vel = Twist(Vector3(0.15,0,0), Vector3(0,0,0))
+                else:
+
+                    vel = Twist(Vector3(0,0,0), Vector3(0,0,twist))
+            else:
+
+
+                if centro_creeper is not None:
+
+                    for r in centro_creeper:
+                        x_bola,y_bola = centro_creeper
+
+                    for r in centro_frame:
+                        x_frame,y_frame = centro_frame
+
+
+                    if x_bola -3 > x_frame:
+                        vel = Twist(Vector3(0,0,0), Vector3(0,0,-twist))
+
+                    if x_bola +3 < x_frame:
+                        vel = Twist(Vector3(0,0,0), Vector3(0,0,twist))   
+
+                    if x_bola-20 < x_frame < x_bola+20:
+                        vel = Twist(Vector3(0.15,0,0), Vector3(0,0,0))
+                else:
+
+                    vel = Twist(Vector3(0,0,0), Vector3(0,0,twist))
+            
+
+
 
 
             
