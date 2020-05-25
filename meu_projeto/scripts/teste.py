@@ -100,9 +100,11 @@ def identifica_cor(frame):
     hsv = cv2.cvtColor(frame, cv2.COLOR_BGR2HSV)
 
     mask1 = cv2.inRange(hsv, hsv1_M, hsv2_M)
-    seg = cv2.morphologyEx(mask1,cv2.MORPH_CLOSE,np.ones((1, 1)))
-    selecao = cv2.bitwise_and(frame, frame, mask=seg)
-    blur = cv2.GaussianBlur(selecao,(5,5),0)
+    #seg = cv2.morphologyEx(mask1,cv2.MORPH_CLOSE,np.ones((1, 1)))
+    selecao = cv2.bitwise_and(frame, frame, mask=mask1)
+    #blur = cv2.GaussianBlur(selecao,(5,5),0)
+    seg = mask1
+    blur = selecao
     min_contrast = 50
     max_contrast = 250
     linhas = cv2.Canny(blur, min_contrast, max_contrast )
@@ -143,6 +145,7 @@ def identifica_cor(frame):
     font = cv2.FONT_HERSHEY_SIMPLEX
     cv2.putText(mask1,'Press q to quit',(0,50), font, 1,(255,255,255),2,cv2.LINE_AA)
     cv2.imshow ('Frame', frame)
+    cv2.imshow ('Selecao', seg)
     
     centro = (frame.shape[1]//2, frame.shape[0]//2)
 
