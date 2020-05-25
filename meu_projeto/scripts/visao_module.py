@@ -31,9 +31,6 @@ def processa(frame):
         cv2.line(img_rgb, (point[0], point[1] - int(length/2)), (point[0], point[1] + int(length/2)),color ,width, length)
 
     cross(result_frame, centro, [255,0,0], 1, 17)
-    cv2.imshow ('Frame', frame)
-    cv2.waitKey(1)
-
 
 
     return centro, result_frame, result_tuples
@@ -104,7 +101,5 @@ def identifica_cor(frame):
     font = cv2.FONT_HERSHEY_COMPLEX_SMALL
     cv2.putText(frame,"{:d} {:d}".format(*media),(20,100), 1, 4,(255,255,255),2,cv2.LINE_AA)
     cv2.putText(frame,"{:0.1f}".format(maior_contorno_area),(20,50), 1, 4,(255,255,255),2,cv2.LINE_AA)
-    
-
 
     return centro, result_frame, result_tuples
