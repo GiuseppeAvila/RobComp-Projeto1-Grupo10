@@ -166,11 +166,13 @@ def follow_road():
         z_twist = 0.15  
 
     if x_road -20 < x_frame < x_road +20:
-        x_speed = 2
+        x_speed = 5
     
     return x_speed, z_twist
 
 def go_to_creeper():
+    
+    global distancia
 
     x_speed = 0
     z_twist = 0
@@ -188,7 +190,7 @@ def go_to_creeper():
         z_twist = 0.15   
 
     if x_creeper-20 < x_frame < x_creeper+20:
-
+        z_twist = 0
         if distancia > 5:
             x_speed = 5
         elif distancia > 2:
@@ -235,34 +237,31 @@ if __name__=="__main__":
             print("Distancia: {}".format(distancia))
 
             vel = Twist(Vector3(0,0,0), Vector3(0,0,0))
-            print (estado)
+            print(estado)
 
-            if centro_road is not None:
+            if estado == True and centro_creeper is not None:
 
-                if centro_creeper is not None:
+                if id == iden or find == True: 
 
-                    if id == iden or find == True: 
+                    x_speed, z_twist = go_to_creeper()
 
-                        x_speed, z_twist = go_to_creeper()
+                    vel = Twist(Vector3(x_speed,0,0), Vector3(0,0,z_twist))
 
-                        vel = Twist(Vector3(x_speed,0,0), Vector3(0,0,z_twist))
+                if id == iden:
+                    find = True
 
-                    if id == iden:
-                        find = True
+                elif id == None or id != iden and find == False:
 
-                    elif id == None or id != iden and find == False:
+                    x_speed, z_twist = follow_road()
 
-                        x_speed, z_twist = follow_road()
+                    vel = Twist(Vector3(x_speed,0,0), Vector3(0,0,z_twist))
 
-                        vel = Twist(Vector3(x_speed,0,0), Vector3(0,0,z_twist))
-                else:
+
+            if estado == False and centro_road is not None:
                 
                     x_speed, z_twist = follow_road() 
 
                     vel = Twist(Vector3(x_speed,0,0), Vector3(0,0,z_twist))          
-
-            else:
-                vel = Twist(Vector3(0,0,0), Vector3(0,0,-0.15))
             
             velocidade_saida.publish(vel)
 

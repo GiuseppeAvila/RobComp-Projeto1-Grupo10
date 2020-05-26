@@ -21,17 +21,15 @@ def image_callback(image, color):
 		upper_color = numpy.array([61, 255, 255])
 
 
-	elif color == "pink":
+	if color == "pink":
 		lower_color = numpy.array([140,  50,  50])
 		upper_color = numpy.array([150, 255, 255])
 
 
-
-	elif color == "blue":
+	if color == "blue":
 
 		lower_color = numpy.array([94, 50, 50])
 		upper_color = numpy.array([104, 255, 255])
-
 
 
 	hsv = cv2.cvtColor(image, cv2.COLOR_BGR2HSV)
@@ -40,9 +38,6 @@ def image_callback(image, color):
 	selecao = cv2.bitwise_and(image, image, mask=segmentado_cor)
 	hsv = cv2.cvtColor(selecao, cv2.COLOR_RGB2HSV)
 	mask = cv2.inRange(hsv, lower_color, upper_color)
-
-
-
 
 	h, w, d = image.shape
 	M = cv2.moments(mask)
