@@ -24,6 +24,8 @@ def image_callback(image):
   lower_yellow = numpy.array([ 20, 50, 50])
   upper_yellow = numpy.array([ 30, 255, 255])
   mask = cv2.inRange(hsv, lower_yellow, upper_yellow)
+  segmentado_cor = cv2.morphologyEx(mask,cv2.MORPH_CLOSE,numpy.ones((50, 50)))
+  selecao = cv2.bitwise_and(image, image, mask=segmentado_cor)
     
   h, w, d = image.shape
   search_top = 3*h/4
@@ -38,8 +40,11 @@ def image_callback(image):
     centro_bola = (cx, cy)
 
     cv2.circle(image, (cx, cy), 20, (0,0,255), -1)
-    cv2.line(image, (centro[0] - int(17/2), centro[1]),  (centro[0] + int(17/2), centro[1]), [255,0,0] ,1, 17)
-    cv2.line(image, (centro[0], centro[1] - int(17/2)), (centro[0], centro[1] + int(17/2)), [255,0,0]  ,1, 17) 
+  else:
+    centro_bola =  None
+
+  cv2.line(image, (centro[0] - int(17/2), centro[1]),  (centro[0] + int(17/2), centro[1]), [255,0,0] ,1, 17)
+  cv2.line(image, (centro[0], centro[1] - int(17/2)), (centro[0], centro[1] + int(17/2)), [255,0,0]  ,1, 17) 
     #cross(image, centro, [255,0,0], 1, 17)
 
 
