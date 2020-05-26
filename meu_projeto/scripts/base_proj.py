@@ -22,6 +22,7 @@ from geometry_msgs.msg import Twist, Vector3, Pose, Vector3Stamped
 from ar_track_alvar_msgs.msg import AlvarMarker, AlvarMarkers
 from nav_msgs.msg import Odometry
 from std_msgs.msg import Header
+import math
 
 
 import visao_module
@@ -45,16 +46,18 @@ y_frame = 0
 x_bola = 0
 x_frame = 0
 estado = False
+find = False
+distancia = 0
 
 area = 0.0
 check_delay = False 
 
 resultados = [] 
 
-x = 0
-y = 0
-z = 0 
-id = 0
+x = None
+y = None
+z = None
+id = None
 
 frame = "camera_link"
 
@@ -62,7 +65,7 @@ tfl = 0
 
 tf_buffer = tf2_ros.Buffer()
 
-
+iden = 11 
 
 
 
@@ -132,7 +135,7 @@ def roda_todo_frame(imagem):
         # CHAMADA PARA SEGUIR AS LINHAS AMARELAS 
         saida_follow , centro_frame, centro_bola =  follow.image_callback(temp_image) 
         # CHAMADA PARA IDENTIFICACAO DOS CREEPERS 
-        saida_creeper, centro_creeper, estado   = creeper.image_callback(temp_image, "pink")    
+        saida_creeper, centro_creeper, estado   = creeper.image_callback(temp_image, "blue")    
         for r in resultados:    
             pass
 
@@ -160,7 +163,7 @@ if __name__=="__main__":
     tfl = tf2_ros.TransformListener(tf_buffer) #conversao do sistema de coordenadas 
     tolerancia = 25
 
-    # Exemplo de categoria de resultados
+    # Exemplo de categoria de resultadosrecebe
     # [('chair', 86.965459585189819, (90, 141), (177, 265))]
 
     try:
@@ -168,22 +171,75 @@ if __name__=="__main__":
 
         twist = 0.15 
 
+        #distancia = int(math.sqrt(x^2 + y^2))
+
         
         while not rospy.is_shutdown():
             vel = Twist(Vector3(0,0,0), Vector3(0,0,0))
             print (estado)
 
-            if estado == False:
-                
-                if centro_bola is not None:
+            if centro_bola is not None:
 
+
+                if centro_creeper is not None:
+
+                    if id == iden or find == True: 
+
+                        for r in centro_creeper:
+                            x_bola,y_bola = centro_creeper
+
+                        for r in centro_frame:
+                            x_frame,y_frame = centro_frame
+
+
+                        if x_bola -3 > x_frame:
+                            vel = Twist(Vector3(0,0,0), Vector3(0,0,-twist))
+
+                        if x_bola +3 < x_frame:
+                            vel = Twist(Vector3(0,0,0), Vector3(0,0,twist))   
+
+                        if x_bola-20 < x_frame < x_bola+20:
+                            vel = Twist(Vector3(0.15,0,0), Vector3(0,0,0))
+
+                        #if distancia == 5:
+                         #   vel = Twist(Vector3(0.1,0,0), Vector3(0,0,0))
+                        #if distancia == 4:
+                        #    vel = Twist(Vector3(0.05,0,0), Vector3(0,0,0))
+                        #if distancia < 4:
+                        #    vel = Twist(Vector3(0,0,0), Vector3(0,0,0))
+
+
+
+
+
+                    if id == iden:
+                        find = True
+
+                    elif id == None or id != iden and find == False:
+
+                        for r in centro_bola:
+                            x_bola,y_bola = centro_bola
+
+                        for r in centro_frame:
+                            x_frame,y_frame = centro_frame
+
+
+                        if x_bola -3 > x_frame:
+                            vel = Twist(Vector3(0,0,0), Vector3(0,0,-twist))
+
+                        if x_bola +3 < x_frame:
+                            vel = Twist(Vector3(0,0,0), Vector3(0,0,twist))   
+
+                        if x_bola-20 < x_frame < x_bola+20:
+                            vel = Twist(Vector3(0.15,0,0), Vector3(0,0,0))
+                else:
+                
                     for r in centro_bola:
                         x_bola,y_bola = centro_bola
 
                     for r in centro_frame:
                         x_frame,y_frame = centro_frame
 
-
                     if x_bola -3 > x_frame:
                         vel = Twist(Vector3(0,0,0), Vector3(0,0,-twist))
 
@@ -191,34 +247,12 @@ if __name__=="__main__":
                         vel = Twist(Vector3(0,0,0), Vector3(0,0,twist))   
 
                     if x_bola-20 < x_frame < x_bola+20:
-                        vel = Twist(Vector3(0.15,0,0), Vector3(0,0,0))
-                else:
+                        vel = Twist(Vector3(0.15,0,0), Vector3(0,0,0))            
 
-                    vel = Twist(Vector3(0,0,0), Vector3(0,0,twist))
             else:
+                vel = Twist(Vector3(0,0,0), Vector3(0,0,-twist))
 
 
-                if centro_creeper is not None:
-
-                    for r in centro_creeper:
-                        x_bola,y_bola = centro_creeper
-
-                    for r in centro_frame:
-                        x_frame,y_frame = centro_frame
-
-
-                    if x_bola -3 > x_frame:
-                        vel = Twist(Vector3(0,0,0), Vector3(0,0,-twist))
-
-                    if x_bola +3 < x_frame:
-                        vel = Twist(Vector3(0,0,0), Vector3(0,0,twist))   
-
-                    if x_bola-20 < x_frame < x_bola+20:
-                        vel = Twist(Vector3(0.15,0,0), Vector3(0,0,0))
-                else:
-
-                    vel = Twist(Vector3(0,0,0), Vector3(0,0,twist))
-            
 
 
 
