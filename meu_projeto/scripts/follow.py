@@ -39,7 +39,7 @@ def image_callback(image):
     cy = int(M['m01']/M['m00'])
     centro_bola = (cx, cy)
 
-    cv2.circle(image, (cx, cy), 20, (0,0,255), -1)
+    cv2.circle(image, (cx, cy), 20, (0,0,255), 5)
   else:
     centro_bola =  None
 
