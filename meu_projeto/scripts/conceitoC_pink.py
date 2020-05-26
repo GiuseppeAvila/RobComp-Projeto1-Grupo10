@@ -139,7 +139,7 @@ def roda_todo_frame(imagem):
         # CHAMADA PARA SEGUIR AS LINHAS AMARELAS 
         saida_follow , centro_frame, centro_road =  follow.image_callback(temp_image) 
         # CHAMADA PARA IDENTIFICACAO DOS CREEPERS 
-        saida_creeper, centro_creeper, estado   = creeper.image_callback(temp_image, "blue")    
+        saida_creeper, centro_creeper, estado   = creeper.image_callback(temp_image, "pink")    
         for r in resultados:    
             pass
 
@@ -160,10 +160,10 @@ def follow_road():
         x_frame,y_frame = centro_frame
 
     if x_road -3 > x_frame:
-        z_twist = -0.15
+        z_twist = -0.15 / 1.2
 
     if x_road +3 < x_frame:
-        z_twist = 0.15  
+        z_twist = 0.15  / 1.2
 
     if x_road -20 < x_frame < x_road +20:
         x_speed = 5
@@ -184,25 +184,31 @@ def go_to_creeper():
         x_frame,y_frame = centro_frame
 
     if x_creeper -3 > x_frame:
-        z_twist = -0.15
+        z_twist = -0.15 / 2.2
 
     if x_creeper +3 < x_frame:
-        z_twist = 0.15   
+        z_twist = 0.15   / 2.2
 
     if x_creeper-20 < x_frame < x_creeper+20:
         z_twist = 0
-        if distancia > 5:
-            x_speed = 5
+        if distancia > 5: #no blue mudar para 6
+            x_speed = 0.9
         elif distancia > 2:
-            x_speed = 2
+            x_speed = 0.8 #no blue mudar para 4
         elif distancia > 1:
-            x_speed = 0.5
+            x_speed = 0.75
         elif distancia > 0.5:
             x_speed = 0.2
-        elif distancia > 0.16:
+        elif distancia > 0.12:
             x_speed = 0.1
-        else: 
-            x_speed = 0
+
+        #Descomentar caso for blue
+        #else: 
+            #x_speed = 0.3
+            #z_twist = -0.3
+
+        elif distancia < 0.12 and distancia > 0.05:
+            x_speed = 0.1
     
     return x_speed, z_twist
 
@@ -263,12 +269,9 @@ if __name__=="__main__":
 
                     vel = Twist(Vector3(x_speed,0,0), Vector3(0,0,z_twist))
 
-            
-            if distancia > 0.05 and distancia < 0.17:
-                    vel = Twist(Vector3(0,0,0), Vector3(0,0,0))
-                    velocidade_saida.publish(vel)
-                    raw_input()       
 
+            #elif distancia > 0.02 and distancia < 0.05:
+             #   vel = Twist(Vector3(-0.04,0,0), Vector3(0,0,z_twist))                
 
             
             velocidade_saida.publish(vel)
@@ -281,5 +284,4 @@ if __name__=="__main__":
 
     except rospy.ROSInterruptException:
         print("Ocorreu uma exceção com o rospy")
-
 
