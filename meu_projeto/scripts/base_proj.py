@@ -310,7 +310,7 @@ if __name__=="__main__":
 
             if le_scan.menor_distancia < 0.3:
                 vel = Twist(Vector3(0,0,0), Vector3(0,0,0)) 
-          
+        
             
             velocidade_saida.publish(vel)
 
