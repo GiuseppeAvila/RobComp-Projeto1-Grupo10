@@ -310,19 +310,7 @@ if __name__=="__main__":
 
             if le_scan.menor_distancia < 0.3:
                 vel = Twist(Vector3(0,0,0), Vector3(0,0,0)) 
-
-
-
-
-
-                    vel = Twist(Vector3(x_speed,0,0), Vector3(0,0,z_twist))
-
-
-            if estado == False and centro_road is not None:
-                
-                    x_speed, z_twist = follow_road() 
-
-                    vel = Twist(Vector3(x_speed,0,0), Vector3(0,0,z_twist))          
+          
             
             velocidade_saida.publish(vel)
 
