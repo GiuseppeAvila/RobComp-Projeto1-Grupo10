@@ -68,8 +68,7 @@ def image_callback(image, color, D):
 
 		saida = True
 	else:
-		pass
-
+		saida = False
 	for cnt in contornos:
 		area = cv2.contourArea(cnt)
 		if area >maior_contorno_area:

@@ -130,7 +130,7 @@ def recebe(msg):
             print("id: {} x {} y {} z {} angulo {} ".format(id, x,y,z, angulo_marcador_robo))
 
         else:
-            pass
+            d = False
 
 
 
