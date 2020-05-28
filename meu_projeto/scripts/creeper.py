@@ -18,7 +18,7 @@ import mobilenet_simples as mnet
 
 saida = False
 
-def image_callback(image, color):
+def image_callback(image, color, D):
 	global frame
 	global saida
 	frame = image.copy()
@@ -64,6 +64,12 @@ def image_callback(image, color):
 	maior_contorno = None
 	maior_contorno_area = 0
 
+	if D == True:
+
+		saida = True
+	else:
+		saida = False
+
 	for cnt in contornos:
 		area = cv2.contourArea(cnt)
 		if area >maior_contorno_area:
@@ -71,7 +77,7 @@ def image_callback(image, color):
 			maior_contorno_area = area
 
 	# Encontramos o centro do contorno fazendo a média de todos seus pontos.
-	if not maior_contorno is None:
+	if not maior_contorno is None and saida == True :
 		cv2.drawContours(frame, [maior_contorno], -1, [0, 0, 255], 5)
 
 		
@@ -79,11 +85,11 @@ def image_callback(image, color):
 		centro_bola = maior_contorno.mean(axis=0)
 		centro_bola= centro_bola.astype(numpy.int32)
 		cv2.circle(frame, (centro_bola[0],centro_bola[1]), 5, [0, 255, 0])
-		saida = True
+
+
 
 	else:
 		centro_bola = None
-		saida = False
 
 
 	return frame, centro_bola, saida
