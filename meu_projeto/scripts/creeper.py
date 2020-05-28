@@ -1,3 +1,4 @@
+#-*- coding:utf-8 -*-
 
 from __future__ import division, print_function
 
@@ -14,45 +15,74 @@ from sensor_msgs.msg import Image, CompressedImage
 from cv_bridge import CvBridge, CvBridgeError
 import mobilenet_simples as mnet
 
+saida = False
+
 def image_callback(image, color):
+	global frame
+	global saida
+	frame = image.copy()
+	hsv = cv2.cvtColor(frame, cv2.COLOR_BGR2HSV)
 
 	if color == "green":
 		lower_color = numpy.array([51, 50, 50])
 		upper_color = numpy.array([61, 255, 255])
 
 
-	if color == "pink":
+	elif color == "pink":
 		lower_color = numpy.array([140,  50,  50])
 		upper_color = numpy.array([150, 255, 255])
 
 
-	if color == "blue":
+
+	elif color == "blue":
 
 		lower_color = numpy.array([94, 50, 50])
 		upper_color = numpy.array([104, 255, 255])
 
 
-	hsv = cv2.cvtColor(image, cv2.COLOR_BGR2HSV)
-	mask = cv2.inRange(hsv, lower_color, upper_color)
-	segmentado_cor = cv2.morphologyEx(mask,cv2.MORPH_CLOSE,numpy.ones((300, 300)))
-	selecao = cv2.bitwise_and(image, image, mask=segmentado_cor)
-	hsv = cv2.cvtColor(selecao, cv2.COLOR_RGB2HSV)
-	mask = cv2.inRange(hsv, lower_color, upper_color)
 
-	h, w, d = image.shape
-	M = cv2.moments(mask)
-	if M['m00'] > 0:
-	 	cx = int(M['m10']/M['m00'])
-	 	cy = int(M['m01']/M['m00'])
-		centro_bola = (cx, cy)
+	#def cross(img_rgb, point, color, width,length):
+    	#cv2.line(img_rgb, (point[0] - length/2, point[1]),  (point[0] + length/2, point[1]), color ,width, length)
+    	#cv2.line(img_rgb, (point[0], point[1] - length/2), (point[0], point[1] + length/2),color ,width, length) 
 
-		cv2.circle(image, (cx, cy), 20, (0,255,0), 5)
+
+
+    # A operação MORPH_CLOSE fecha todos os buracos na máscara menores 
+    # que um quadrado 7x7. É muito útil para juntar vários 
+    # pequenos contornos muito próximos em um só.
+
+
+	
+	segmentado_cor = cv2.inRange(hsv, lower_color, upper_color)
+	segmentado_cor = cv2.morphologyEx(segmentado_cor,cv2.MORPH_CLOSE,numpy.ones((10, 10)))
+
+	# Encontramos os contornos na máscara e selecionamos o de maior área
+	#contornos, arvore = cv2.findContours(segmentado_cor.copy(), cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)	
+	contornos, arvore = cv2.findContours(segmentado_cor.copy(), cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE) 
+
+	maior_contorno = None
+	maior_contorno_area = 0
+
+	for cnt in contornos:
+		area = cv2.contourArea(cnt)
+		if area >maior_contorno_area:
+			maior_contorno = cnt
+			maior_contorno_area = area
+
+	# Encontramos o centro do contorno fazendo a média de todos seus pontos.
+	if not maior_contorno is None:
+		cv2.drawContours(frame, [maior_contorno], -1, [0, 0, 255], 5)
+
+		
+		maior_contorno = numpy.reshape(maior_contorno, (maior_contorno.shape[0], 2))
+		centro_bola = maior_contorno.mean(axis=0)
+		centro_bola= centro_bola.astype(numpy.int32)
+		cv2.circle(frame, (centro_bola[0],centro_bola[1]), 5, [0, 255, 0])
 		saida = True
+
 	else:
-		centro_bola =  None
+		centro_bola = None
 		saida = False
 
 
-	return image, centro_bola, saida
-
-
+	return frame, centro_bola, saida
