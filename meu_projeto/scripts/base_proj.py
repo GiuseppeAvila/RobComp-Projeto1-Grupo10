@@ -290,11 +290,11 @@ if __name__=="__main__":
                     vel = Twist(Vector3(0.15,0,0), Vector3(0,0,0)) 
 
                 
-            if centro_bola is None and estado == False:
+            if centro_road is None and estado == False:
                 vel = Twist(Vector3(0,0,0), Vector3(0,0,-twist)) 
 
-            if estado == False and centro_bola is not None:
-                x_bola,y_bola = centro_bola
+            if estado == False and centro_road is not None:
+                x_bola,y_bola = centro_road
 
                 x_frame,y_frame = centro_frame
 
