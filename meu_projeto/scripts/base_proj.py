@@ -49,13 +49,13 @@ bridge = CvBridge()
 cv_image = None
 cv_image_1 = None
 media = []
-centro_road = None
+centro_bola = None
 centro_frame = None
 centro_creeper = None
 atraso = 1.5E9 
-y_road = 0
+y_bola = 0
 y_frame = 0
-x_road = 0
+x_bola = 0
 x_frame = 0
 estado = False
 find = False
@@ -86,9 +86,9 @@ tf_buffer = tf2_ros.Buffer()
 
 
 def recebe(msg):
-    global x_marker # O global impede a recriacao de uma variavel local, para podermos usar o x global ja'  declarado
-    global y_marker
-    global z_marker
+    global x # O global impede a recriacao de uma variavel local, para podermos usar o x global ja'  declarado
+    global y
+    global z
     global id
     global d
     for marker in msg.markers:
@@ -142,7 +142,7 @@ def roda_todo_frame(imagem):
     global cv_image_1
     global media
     global centro_frame
-    global centro_road
+    global centro_bola
     global centro_creeper
     global resultados
     global estado
@@ -162,7 +162,7 @@ def roda_todo_frame(imagem):
         temp_image = bridge.compressed_imgmsg_to_cv2(imagem, "bgr8")
 
         # CHAMADA PARA SEGUIR AS LINHAS AMARELAS 
-        saida_follow , centro_frame, centro_road =  follow.image_callback(temp_image) 
+        saida_follow , centro_frame, centro_bola =  follow.image_callback(temp_image) 
         # CHAMADA PARA IDENTIFICACAO DOS CREEPERS 
         saida_creeper, centro_creeper, estado   = creeper.image_callback(temp_image, COR, d)   
 
@@ -175,64 +175,6 @@ def roda_todo_frame(imagem):
         cv_image_1 = saida_creeper.copy()
     except CvBridgeError as e:
         print('ex', e)
-
-def follow_road():
-
-    x_speed = 0
-    z_twist = 0
-    
-    for r in centro_road:
-        x_road,y_road = centro_road
-
-    for r in centro_frame:
-        x_frame,y_frame = centro_frame
-
-    if x_road -3 > x_frame:
-        z_twist = -0.15
-
-    if x_road +3 < x_frame:
-        z_twist = 0.15  
-
-    if x_road -20 < x_frame < x_road +20:
-        x_speed = 5
-    
-    return x_speed, z_twist
-
-def go_to_creeper():
-    
-    global distancia
-
-    x_speed = 0
-    z_twist = 0
-    
-    for r in centro_creeper:
-        x_creeper,y_creeper = centro_creeper
-
-    for r in centro_frame:
-        x_frame,y_frame = centro_frame
-
-    if x_creeper -3 > x_frame:
-        z_twist = -0.15
-
-    if x_creeper +3 < x_frame:
-        z_twist = 0.15   
-
-    if x_creeper-20 < x_frame < x_creeper+20:
-        z_twist = 0
-        if distancia > 5:
-            x_speed = 5
-        elif distancia > 2:
-            x_speed = 2
-        elif distancia > 1:
-            x_speed = 0.5
-        elif distancia > 0.5:
-            x_speed = 0.2
-        elif distancia > 0.16:
-            x_speed = 0.1
-        else: 
-            x_speed = 0
-    
-    return x_speed, z_twist
 
 
 #CODIGO MAIN        
@@ -274,8 +216,6 @@ if __name__=="__main__":
 
                 x_bola,y_bola = centro_creeper
 
-            distancia = math.sqrt(x_marker**2 + y_marker**2)
-            print("Distancia: {}".format(distancia))
 
                 x_frame,y_frame = centro_frame
 
@@ -309,14 +249,9 @@ if __name__=="__main__":
 
 
 
-                    vel = Twist(Vector3(x_speed,0,0), Vector3(0,0,z_twist))
 
 
-            if estado == False and centro_road is not None:
-                
-                    x_speed, z_twist = follow_road() 
 
-                    vel = Twist(Vector3(x_speed,0,0), Vector3(0,0,z_twist))          
             
             velocidade_saida.publish(vel)
 

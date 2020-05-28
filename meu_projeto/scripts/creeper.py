@@ -29,12 +29,13 @@ def image_callback(image, color, D):
 		upper_color = numpy.array([61, 255, 255])
 
 
-	if color == "pink":
+	elif color == "pink":
 		lower_color = numpy.array([140,  50,  50])
 		upper_color = numpy.array([150, 255, 255])
 
 
-	if color == "blue":
+
+	elif color == "blue":
 
 		lower_color = numpy.array([94, 50, 50])
 		upper_color = numpy.array([104, 255, 255])
