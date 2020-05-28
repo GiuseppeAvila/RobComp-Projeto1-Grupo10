@@ -30,6 +30,18 @@ import follow
 import creeper
 
 
+
+########
+
+COR = "pink"
+
+IDENT = 12
+
+
+
+############
+
+
 # MONTANDO AS VARIÁVES
 
 bridge = CvBridge()
@@ -48,6 +60,12 @@ x_frame = 0
 estado = False
 find = False
 distancia = 0
+cu =0
+co = 0
+d = False
+
+obj_x = 0
+obj_y = 0
 
 area = 0.0
 check_delay = False 
@@ -65,8 +83,6 @@ tfl = 0
 
 tf_buffer = tf2_ros.Buffer()
 
-iden = 11 
-
 
 
 def recebe(msg):
@@ -74,38 +90,47 @@ def recebe(msg):
     global y
     global z
     global id
+    global d
     for marker in msg.markers:
+
         id = marker.id
-        marcador = "ar_marker_" + str(id)
 
-        print(tf_buffer.can_transform(frame, marcador, rospy.Time(0)))
-        header = Header(frame_id=marcador)
-        # Procura a transformacao em sistema de coordenadas entre a base do robo e o marcador numero 100
-        # Note que para seu projeto 1 voce nao vai precisar de nada que tem abaixo, a 
-        # Nao ser que queira levar angulos em conta
-        trans = tf_buffer.lookup_transform(frame, marcador, rospy.Time(0))
-        
-        # Separa as translacoes das rotacoes
-        x = trans.transform.translation.x
-        y = trans.transform.translation.y
-        z = trans.transform.translation.z
-        # ATENCAO: tudo o que vem a seguir e'  so para calcular um angulo
-        # Para medirmos o angulo entre marcador e robo vamos projetar o eixo Z do marcador (perpendicular) 
-        # no eixo X do robo (que e'  a direcao para a frente)
-        t = transformations.translation_matrix([x, y, z])
-        # Encontra as rotacoes e cria uma matriz de rotacao a partir dos quaternions
-        r = transformations.quaternion_matrix([trans.transform.rotation.x, trans.transform.rotation.y, trans.transform.rotation.z, trans.transform.rotation.w])
-        m = numpy.dot(r,t) # Criamos a matriz composta por translacoes e rotacoes
-        z_marker = [0,0,1,0] # Sao 4 coordenadas porque e'  um vetor em coordenadas homogeneas
-        v2 = numpy.dot(m, z_marker)
-        v2_n = v2[0:-1] # Descartamos a ultima posicao
-        n2 = v2_n/linalg.norm(v2_n) # Normalizamos o vetor
-        x_robo = [1,0,0]
-        cosa = numpy.dot(n2, x_robo) # Projecao do vetor normal ao marcador no x do robo
-        angulo_marcador_robo = math.degrees(math.acos(cosa))
+        if id == IDENT:
 
-        # Terminamos
-        print("id: {} x {} y {} z {} angulo {} ".format(id, x,y,z, angulo_marcador_robo))
+            d = True
+            marcador = "ar_marker_" + str(id)
+
+            print(tf_buffer.can_transform(frame, marcador, rospy.Time(0)))
+            header = Header(frame_id=marcador)
+            # Procura a transformacao em sistema de coordenadas entre a base do robo e o marcador numero 100
+            # Note que para seu projeto 1 voce nao vai precisar de nada que tem abaixo, a 
+            # Nao ser que queira levar angulos em conta
+            trans = tf_buffer.lookup_transform(frame, marcador, rospy.Time(0))
+            
+            # Separa as translacoes das rotacoes
+            x = trans.transform.translation.x
+            y = trans.transform.translation.y
+            z = trans.transform.translation.z
+            # ATENCAO: tudo o que vem a seguir e'  so para calcular um angulo
+            # Para medirmos o angulo entre marcador e robo vamos projetar o eixo Z do marcador (perpendicular) 
+            # no eixo X do robo (que e'  a direcao para a frente)
+            t = transformations.translation_matrix([x, y, z])
+            # Encontra as rotacoes e cria uma matriz de rotacao a partir dos quaternions
+            r = transformations.quaternion_matrix([trans.transform.rotation.x, trans.transform.rotation.y, trans.transform.rotation.z, trans.transform.rotation.w])
+            m = numpy.dot(r,t) # Criamos a matriz composta por translacoes e rotacoes
+            z_marker = [0,0,1,0] # Sao 4 coordenadas porque e'  um vetor em coordenadas homogeneas
+            v2 = numpy.dot(m, z_marker)
+            v2_n = v2[0:-1] # Descartamos a ultima posicao
+            n2 = v2_n/linalg.norm(v2_n) # Normalizamos o vetor
+            x_robo = [1,0,0]
+            cosa = numpy.dot(n2, x_robo) # Projecao do vetor normal ao marcador no x do robo
+            angulo_marcador_robo = math.degrees(math.acos(cosa))
+
+            # Terminamos
+            print("id: {} x {} y {} z {} angulo {} ".format(id, x,y,z, angulo_marcador_robo))
+
+        else:
+            pass
 
 
 
@@ -114,12 +139,16 @@ def recebe(msg):
 
 def roda_todo_frame(imagem):
     global cv_image
+    global cv_image_1
     global media
     global centro_frame
     global centro_bola
     global centro_creeper
     global resultados
     global estado
+    global cu
+
+    global co
 
     now = rospy.get_rostime()
     imgtime = imagem.header.stamp
@@ -135,12 +164,15 @@ def roda_todo_frame(imagem):
         # CHAMADA PARA SEGUIR AS LINHAS AMARELAS 
         saida_follow , centro_frame, centro_bola =  follow.image_callback(temp_image) 
         # CHAMADA PARA IDENTIFICACAO DOS CREEPERS 
-        saida_creeper, centro_creeper, estado   = creeper.image_callback(temp_image, "blue")    
+        saida_creeper, centro_creeper, estado   = creeper.image_callback(temp_image, COR, d)   
+
+
         for r in resultados:    
             pass
 
         depois = time.clock()
-        cv_image = saida_creeper.copy()
+        cv_image = saida_follow.copy()
+        cv_image_1 = saida_creeper.copy()
     except CvBridgeError as e:
         print('ex', e)
 
@@ -176,81 +208,44 @@ if __name__=="__main__":
         
         while not rospy.is_shutdown():
             vel = Twist(Vector3(0,0,0), Vector3(0,0,0))
+
             print (estado)
+            
 
-            if centro_bola is not None:
+            if estado == True:
 
-
-                if centro_creeper is not None:
-
-                    if id == iden or find == True: 
-
-                        for r in centro_creeper:
-                            x_bola,y_bola = centro_creeper
-
-                        for r in centro_frame:
-                            x_frame,y_frame = centro_frame
+                x_bola,y_bola = centro_creeper
 
 
-                        if x_bola -3 > x_frame:
-                            vel = Twist(Vector3(0,0,0), Vector3(0,0,-twist))
+                x_frame,y_frame = centro_frame
 
-                        if x_bola +3 < x_frame:
-                            vel = Twist(Vector3(0,0,0), Vector3(0,0,twist))   
+                if x_bola -3 > x_frame:
+                    vel = Twist(Vector3(0,0,0), Vector3(0,0,-twist))
 
-                        if x_bola-20 < x_frame < x_bola+20:
-                            vel = Twist(Vector3(0.15,0,0), Vector3(0,0,0))
+                if x_bola +3 < x_frame:
+                    vel = Twist(Vector3(0,0,0), Vector3(0,0,twist))   
 
-                        #if distancia == 5:
-                         #   vel = Twist(Vector3(0.1,0,0), Vector3(0,0,0))
-                        #if distancia == 4:
-                        #    vel = Twist(Vector3(0.05,0,0), Vector3(0,0,0))
-                        #if distancia < 4:
-                        #    vel = Twist(Vector3(0,0,0), Vector3(0,0,0))
+                if x_bola-20 < x_frame < x_bola+20:
+                    vel = Twist(Vector3(0.15,0,0), Vector3(0,0,0)) 
 
-
-
-
-
-                    if id == iden:
-                        find = True
-
-                    elif id == None or id != iden and find == False:
-
-                        for r in centro_bola:
-                            x_bola,y_bola = centro_bola
-
-                        for r in centro_frame:
-                            x_frame,y_frame = centro_frame
-
-
-                        if x_bola -3 > x_frame:
-                            vel = Twist(Vector3(0,0,0), Vector3(0,0,-twist))
-
-                        if x_bola +3 < x_frame:
-                            vel = Twist(Vector3(0,0,0), Vector3(0,0,twist))   
-
-                        if x_bola-20 < x_frame < x_bola+20:
-                            vel = Twist(Vector3(0.15,0,0), Vector3(0,0,0))
-                else:
                 
-                    for r in centro_bola:
-                        x_bola,y_bola = centro_bola
+            if centro_bola is None and estado == False:
+                vel = Twist(Vector3(0,0,0), Vector3(0,0,-twist)) 
 
-                    for r in centro_frame:
-                        x_frame,y_frame = centro_frame
+            if estado == False and centro_bola is not None:
+                x_bola,y_bola = centro_bola
 
-                    if x_bola -3 > x_frame:
-                        vel = Twist(Vector3(0,0,0), Vector3(0,0,-twist))
+                x_frame,y_frame = centro_frame
 
-                    if x_bola +3 < x_frame:
-                        vel = Twist(Vector3(0,0,0), Vector3(0,0,twist))   
+                if x_bola -3 > x_frame:
+                    vel = Twist(Vector3(0,0,0), Vector3(0,0,-twist))
 
-                    if x_bola-20 < x_frame < x_bola+20:
-                        vel = Twist(Vector3(0.15,0,0), Vector3(0,0,0))            
+                if x_bola +3 < x_frame:
+                    vel = Twist(Vector3(0,0,0), Vector3(0,0,twist))   
 
-            else:
-                vel = Twist(Vector3(0,0,0), Vector3(0,0,-twist))
+                if x_bola-20 < x_frame < x_bola+20:
+                    vel = Twist(Vector3(0.15,0,0), Vector3(0,0,0)) 
+
 
 
 
@@ -262,7 +257,7 @@ if __name__=="__main__":
 
             if cv_image is not None:
                 # Note que o imshow precisa ficar *ou* no codigo de tratamento de eventos *ou* no thread principal, não em ambos
-                cv2.imshow("cv_image no loop principal", cv_image)
+                cv2.imshow("cv_image no loop principal", cv_image_1 )
                 cv2.waitKey(1)
             rospy.sleep(0.1)
 
