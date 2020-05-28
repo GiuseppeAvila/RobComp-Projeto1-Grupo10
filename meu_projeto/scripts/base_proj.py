@@ -23,6 +23,8 @@ from ar_track_alvar_msgs.msg import AlvarMarker, AlvarMarkers
 from nav_msgs.msg import Odometry
 from std_msgs.msg import Header
 import math
+import le_scan
+from sensor_msgs.msg import LaserScan
 
 
 import visao_module
@@ -33,7 +35,7 @@ import creeper
 
 ########
 
-COR = "pink"
+COR = "blue"
 
 IDENT = 12
 
@@ -164,7 +166,7 @@ def roda_todo_frame(imagem):
         # CHAMADA PARA SEGUIR AS LINHAS AMARELAS 
         saida_follow , centro_frame, centro_bola =  follow.image_callback(temp_image) 
         # CHAMADA PARA IDENTIFICACAO DOS CREEPERS 
-        saida_creeper, centro_creeper, estado   = creeper.image_callback(temp_image, COR, d)   
+        saida_creeper, centro_creeper, estado   = creeper.image_callback(temp_image, COR)   
 
 
         for r in resultados:    
@@ -183,6 +185,7 @@ if __name__=="__main__":
     rospy.init_node("cor")
 
     topico_imagem = "/camera/rgb/image_raw/compressed"
+    scan_sub = rospy.Subscriber("/scan", LaserScan, le_scan.scaneou)
 
     recebedor = rospy.Subscriber(topico_imagem, CompressedImage, roda_todo_frame, queue_size=4, buff_size = 2**24)
     recebedor = rospy.Subscriber("/ar_pose_marker", AlvarMarkers, recebe) # Para recebermos notificacoes de que marcadores foram vistos
@@ -245,6 +248,11 @@ if __name__=="__main__":
 
                 if x_bola-20 < x_frame < x_bola+20:
                     vel = Twist(Vector3(0.15,0,0), Vector3(0,0,0)) 
+
+
+            if le_scan.menor_distancia < 0.3:
+                vel = Twist(Vector3(0,0,0), Vector3(0,0,0)) 
+
 
 
 
