@@ -39,6 +39,8 @@ COR = "blue"
 
 IDENT = 12
 
+NOME = "cat"
+
 
 
 ############
@@ -54,16 +56,19 @@ media = []
 centro_bola = None
 centro_frame = None
 centro_creeper = None
+centro = None
 atraso = 1.5E9 
 y_bola = 0
 y_frame = 0
 x_bola = 0
 x_frame = 0
 estado = False
+found_box = False
+GoBox = False
 find = False
 distancia = 0
-cu =0
-co = 0
+start_x = 0
+
 d = False
 
 obj_x = 0
@@ -148,9 +153,9 @@ def roda_todo_frame(imagem):
     global centro_creeper
     global resultados
     global estado
-    global cu
-
-    global co
+    global GoBox
+    global found_box
+    global start_x
 
     now = rospy.get_rostime()
     imgtime = imagem.header.stamp
@@ -166,15 +171,14 @@ def roda_todo_frame(imagem):
         # CHAMADA PARA SEGUIR AS LINHAS AMARELAS 
         saida_follow , centro_frame, centro_bola =  follow.image_callback(temp_image) 
         # CHAMADA PARA IDENTIFICACAO DOS CREEPERS 
-        saida_creeper, centro_creeper, estado   = creeper.image_callback(temp_image, COR)   
+        saida_creeper, centro_creeper, estado   = creeper.image_callback(temp_image, COR)
 
+        centro, saida_net, resultados, start_x, found_box=  visao_module.processa(temp_image, NOME)        
 
-        for r in resultados:    
-            pass
 
         depois = time.clock()
         cv_image = saida_follow.copy()
-        cv_image_1 = saida_creeper.copy()
+        cv_image_1 = saida_net.copy()
     except CvBridgeError as e:
         print('ex', e)
 
@@ -213,45 +217,95 @@ if __name__=="__main__":
             vel = Twist(Vector3(0,0,0), Vector3(0,0,0))
 
             print (estado)
+            print (GoBox)
+
+            if GoBox == False:
             
 
-            if estado == True:
+                if estado == True:
 
-                x_bola,y_bola = centro_creeper
-
-
-                x_frame,y_frame = centro_frame
-
-                if x_bola -3 > x_frame:
-                    vel = Twist(Vector3(0,0,0), Vector3(0,0,-twist))
-
-                if x_bola +3 < x_frame:
-                    vel = Twist(Vector3(0,0,0), Vector3(0,0,twist))   
-
-                if x_bola-20 < x_frame < x_bola+20:
-                    vel = Twist(Vector3(0.15,0,0), Vector3(0,0,0)) 
-
-                
-            if centro_bola is None and estado == False:
-                vel = Twist(Vector3(0,0,0), Vector3(0,0,-twist)) 
-
-            if estado == False and centro_bola is not None:
-                x_bola,y_bola = centro_bola
-
-                x_frame,y_frame = centro_frame
-
-                if x_bola -3 > x_frame:
-                    vel = Twist(Vector3(0,0,0), Vector3(0,0,-twist))
-
-                if x_bola +3 < x_frame:
-                    vel = Twist(Vector3(0,0,0), Vector3(0,0,twist))   
-
-                if x_bola-20 < x_frame < x_bola+20:
-                    vel = Twist(Vector3(0.15,0,0), Vector3(0,0,0)) 
+                    x_bola,y_bola = centro_creeper
 
 
-            if le_scan.menor_distancia < 0.3:
-                vel = Twist(Vector3(0,0,0), Vector3(0,0,0)) 
+                    x_frame,y_frame = centro_frame
+
+                    if x_bola -3 > x_frame:
+                        vel = Twist(Vector3(0,0,0), Vector3(0,0,-twist))
+
+                    if x_bola +3 < x_frame:
+                        vel = Twist(Vector3(0,0,0), Vector3(0,0,twist))   
+
+                    if x_bola-20 < x_frame < x_bola+20:
+                        vel = Twist(Vector3(0.15,0,0), Vector3(0,0,0)) 
+
+                    
+                if centro_bola is None and estado == False:
+                    vel = Twist(Vector3(0,0,0), Vector3(0,0,-twist)) 
+
+                if estado == False and centro_bola is not None:
+                    x_bola,y_bola = centro_bola
+
+                    x_frame,y_frame = centro_frame
+
+                    if x_bola -3 > x_frame:
+                        vel = Twist(Vector3(0,0,0), Vector3(0,0,-twist))
+
+                    if x_bola +3 < x_frame:
+                        vel = Twist(Vector3(0,0,0), Vector3(0,0,twist))   
+
+                    if x_bola-20 < x_frame < x_bola+20:
+                        vel = Twist(Vector3(0.15,0,0), Vector3(0,0,0)) 
+
+
+                if 0.05 < le_scan.menor_distancia < 0.3:
+                    vel = Twist(Vector3(0,0,0), Vector3(0,0,0))
+                    velocidade_saida.publish(vel)
+                    print ("raw input")
+                    raw_input()
+
+
+
+
+
+                    GoBox = True
+
+            else:
+
+                if found_box == True:
+                    x_bola= start_x
+
+                    x_frame,y_frame = centro_frame
+
+                    if x_bola -3 > x_frame:
+                        vel = Twist(Vector3(0,0,0), Vector3(0,0,-twist))
+
+                    if x_bola +3 < x_frame:
+                        vel = Twist(Vector3(0,0,0), Vector3(0,0,twist))   
+
+                    if x_bola-20 < x_frame < x_bola+20:
+                        vel = Twist(Vector3(0.15,0,0), Vector3(0,0,0)) 
+
+                    
+                if centro_bola is None and found_box == False:
+                    vel = Twist(Vector3(0,0,0), Vector3(0,0,-twist)) 
+
+                if found_box == False and centro_bola is not None:
+                    x_bola,y_bola = centro_bola
+
+                    x_frame,y_frame = centro_frame
+
+                    if x_bola -3 > x_frame:
+                        vel = Twist(Vector3(0,0,0), Vector3(0,0,-twist))
+
+                    if x_bola +3 < x_frame:
+                        vel = Twist(Vector3(0,0,0), Vector3(0,0,twist))   
+
+                    if x_bola-20 < x_frame < x_bola+20:
+                        vel = Twist(Vector3(0.15,0,0), Vector3(0,0,0)) 
+
+
+
+
             
 
             velocidade_saida.publish(vel)
