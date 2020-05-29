@@ -18,7 +18,7 @@ scripts = os.path.join(path,  "scripts")
 
 proto = os.path.join(scripts,"MobileNetSSD_deploy.prototxt.txt")
 model = os.path.join(scripts, "MobileNetSSD_deploy.caffemodel")
-confianca = 0.2
+confianca = 0.1
 
 
 # initialize the list of class labels MobileNet SSD was trained to
@@ -37,9 +37,13 @@ net = cv2.dnn.readNetFromCaffe(proto, model)
 # by resizing to a fixed 300x300 pixels and then normalizing it
 # (note: normalization is done via the authors of the MobileNet SSD
 # implementation)
+indice = 0 
 
+found = False
 
-def detect(frame):
+def detect(frame, NOME):
+    global indice
+    global found
     image = frame.copy()
     (h, w) = image.shape[:2]
     blob = cv2.dnn.blobFromImage(cv2.resize(image, (300, 300)), 0.007843, (300, 300), 127.5)
@@ -52,8 +56,19 @@ def detect(frame):
 
     results = []
 
+    if NOME ==  "bicycle":
+        indice = 2
+    if NOME == "cat":
+        indice = 8
+    if NOME == "dog":
+        indice = 12
+
     # loop over the detections
     for i in np.arange(0, detections.shape[2]):
+
+
+
+
         # extract the confidence (i.e., probability) associated with the
         # prediction
         confidence = detections[0, 0, i, 2]
@@ -67,22 +82,27 @@ def detect(frame):
             # then compute the (x, y)-coordinates of the bounding box for
             # the object
             idx = int(detections[0, 0, i, 1])
-            box = detections[0, 0, i, 3:7] * np.array([w, h, w, h])
-            (startX, startY, endX, endY) = box.astype("int")
+            if idx == indice:
+                box = detections[0, 0, i, 3:7] * np.array([w, h, w, h])
+                (startX, startY, endX, endY) = box.astype("int")
 
-            # display the prediction
-            label = "{}: {:.2f}%".format(CLASSES[idx], confidence * 100)
-            #print("[INFO] {}".format(label))
-            cv2.rectangle(image, (startX, startY), (endX, endY),
-                COLORS[idx], 2)
-            y = startY - 15 if startY - 15 > 15 else startY + 15
-            cv2.putText(image, label, (startX, y),
-                cv2.FONT_HERSHEY_SIMPLEX, 0.5, COLORS[idx], 2)
+                # display the prediction
+                label = "{}: {:.2f}%".format(CLASSES[idx], confidence * 100)
+                #print("[INFO] {}".format(label))
+                cv2.rectangle(image, (startX, startY), (endX, endY),
+                    COLORS[idx], 2)
+                y = startY - 15 if startY - 15 > 15 else startY + 15
+                cv2.putText(image, label, (startX, y),
+                    cv2.FONT_HERSHEY_SIMPLEX, 0.5, COLORS[idx], 2)
+                found = True
 
-            results.append((CLASSES[idx], confidence*100, (startX, startY),(endX, endY) ))
+                results.append((CLASSES[idx], confidence*100, (startX, startY),(endX, endY) ))
 
-    # show the output image
-    return image, results
+        else:
+            startX = 0    
+
+                # show the output image
+    return image, results, startX, found
 
 
 
